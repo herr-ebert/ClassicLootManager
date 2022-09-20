@@ -46,12 +46,14 @@ local guiOptions = {
     args = {}
 }
 
+local enableGargulTMB = true
+
 local function ST_GetHighlightFunction(row)
-    return row.cols[5].value
+    return row.cols[6].value
 end
 
 local function ST_GetActualBidValue(row)
-    return row.cols[6].value
+    return row.cols[7].value
 end
 
 local highlightRole = {
@@ -167,6 +169,13 @@ end
 
 local AuctionManagerGUI = {}
 function AuctionManagerGUI:Initialize()
+
+    enableGargulTMB = _G.Gargul.TMB.available()
+
+    if enableGargulTMB then
+        BASE_WIDTH = BASE_WIDTH + 60
+    end
+
     LOG:Trace("AuctionManagerGUI:Initialize()")
     InitializeDB(self)
     CLM.MODULES.EventManager:RegisterWoWEvent({"PLAYER_LOGOUT"}, (function(...) StoreLocation(self) end))
@@ -232,6 +241,11 @@ local function CreateBidWindow(self)
             -- sort = ScrollingTable.SORT_DSC, -- This Sort disables nexsort of others relying on this column
         },
     }
+
+    if enableGargulTMB then
+        tinsert(columns, { name = "Wishlist" ,  width = 60})
+    end
+
     self.st = ScrollingTable:CreateST(columns, 10, 18, nil, BidWindowGroup.frame)
     self.st:EnableSelection(true)
     self.st.frame:SetPoint("TOPLEFT", BidWindowGroup.frame, "TOPLEFT", 0, -25)
@@ -687,11 +701,24 @@ function AuctionManagerGUI:Refresh()
                 else
                     current = self.roster:Priority(profile:GUID())
                 end
+                
+                local prio = ""           
+
+                if enableGargulTMB then
+                    -- not sure why i have to put an extra param in here at the start?
+                    local wlData = _G.Gargul.TMB.byItemIdAndPlayer(123, self.itemId , name)
+            
+                    if wlData ~= nil and wlData[1] ~= nil then
+                        prio = wlData[1].prio
+                    end
+                end
+
                 local row = {cols = {
-                    {value = profile:Name()},
+                    {value = name},
                     {value = UTILS.ColorCodeClass(profile:Class())},
                     {value = bid, color = color},
                     {value = current},
+                    {value = prio},
                     -- not visible
                     {value = highlightRole[profile:Role()]},
                     {value = bidValue}
