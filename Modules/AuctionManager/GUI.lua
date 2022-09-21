@@ -229,9 +229,6 @@ local function CreateBidWindow(self)
     BidWindowGroup:SetLayout("Flow")
     local columns = {
         {name = CLM.L["Name"],  width = 70},
-        {name = CLM.L["Class"], width = 60,
-            comparesort = UTILS.LibStCompareSortWrapper(UTILS.LibStModifierFn)
-        },
         {name = CLM.L["Bid"],   width = 120, color = colorGreen,
             sort = ScrollingTable.SORT_DSC,
             sortnext = 4,
@@ -240,10 +237,11 @@ local function CreateBidWindow(self)
         {name = CLM.L["Current"],  width = 60, color = {r = 0.92, g = 0.70, b = 0.13, a = 1.0},
             -- sort = ScrollingTable.SORT_DSC, -- This Sort disables nexsort of others relying on this column
         },
+        {name = CLM.L["Roll"],  width = 30},
     }
 
     if enableGargulTMB then
-        tinsert(columns, { name = "Wishlist" ,  width = 60})
+        tinsert(columns, { name = "Wishlist" ,  width = 30})
     end
 
     self.st = ScrollingTable:CreateST(columns, 10, 18, nil, BidWindowGroup.frame)
@@ -714,10 +712,10 @@ function AuctionManagerGUI:Refresh()
                 end
 
                 local row = {cols = {
-                    {value = name},
-                    {value = UTILS.ColorCodeClass(profile:Class())},
+                    {value = UTILS.ColorCodeText(profile:Name(), UTILS.GetClassColor(profile:Class()).hex)},
                     {value = bid, color = color},
                     {value = current},
+                    {value = math.random(100)},
                     {value = prio},
                     -- not visible
                     {value = highlightRole[profile:Role()]},
